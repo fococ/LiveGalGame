@@ -62,6 +62,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.zIndex
 // ...existing imports
 import com.example.livegg1.Utils.cropBitmapToAspectRatio
 import com.example.livegg1.Utils.takePhoto
@@ -85,7 +86,10 @@ import java.lang.IllegalStateException
 import com.example.livegg1.R
 
 @Composable
-fun CameraScreen(cameraExecutor: ExecutorService) {
+fun CameraScreen(
+    cameraExecutor: ExecutorService,
+    chapterTitle: String = "Chapter 1"
+) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val configuration = LocalConfiguration.current
@@ -274,6 +278,7 @@ fun CameraScreen(cameraExecutor: ExecutorService) {
         captionToShow = captionToShow,
         progress = progress,
         timeRemainingSec = timeRemainingSec,
+        chapterTitle = chapterTitle,
         previewView = { AndroidView({ previewView }, modifier = Modifier.fillMaxSize()) }
     )
 }
@@ -287,11 +292,57 @@ private fun CameraScreenContent(
     timeRemainingSec: Float,
     rectOffsetX: Dp = 4.dp,
     rectOffsetY: Dp = 10.dp,
+    chapterTitle: String,
     previewView: @Composable () -> Unit
 ) {
+    val context = LocalContext.current
+    val hasChapterDrawable = remember(context) {
+        context.resources.getIdentifier("chapter", "drawable", context.packageName) != 0
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         // 1. 摄像头预览或占位图一直在最底层
         previewView()
+
+        // 左上角章节标签背景
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(top = 24.dp)
+                .zIndex(2f)
+        ) {
+            val baseModifier = Modifier.width(180.dp).height(68.dp)
+            if (hasChapterDrawable) {
+                Image(
+                    painter = painterResource(id = R.drawable.chapter),
+                    contentDescription = "Chapter background",
+                    contentScale = ContentScale.FillBounds,
+                    modifier = baseModifier
+                )
+            } else {
+                Box(
+                    modifier = baseModifier
+                        .background(
+                            color = Color(0xAA0F3D35),
+                            shape = RoundedCornerShape(topEnd = 20.dp, bottomEnd = 20.dp)
+                        )
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .padding(start = 24.dp, end = 16.dp),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                Text(
+                    text = chapterTitle,
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    maxLines = 1
+                )
+            }
+        }
 
         // 2. 图像或加载指示器
         when {
@@ -490,6 +541,7 @@ fun CameraScreenPreview() {
             captionToShow = "这是第一句已经识别完成的字幕。\n这是第二句，仍在识别中...",
             progress = 0.5f,
             timeRemainingSec = 2.5f,
+            chapterTitle = "Chapter 1: Prologue",
             previewView = {
                 Box(modifier = Modifier.fillMaxSize().background(Color.DarkGray))
             }

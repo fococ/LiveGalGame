@@ -19,7 +19,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -78,9 +77,8 @@ class MainActivity : ComponentActivity() {
             LiveGG1Theme {
                 val allPermissionsGranted = permissionsGranted.all { it.value }
                 if (allPermissionsGranted) {
-                    val context = LocalContext.current
                     val lifecycleOwner = LocalLifecycleOwner.current
-                    val speechListener = remember { KeywordSpeechListener(context.applicationContext) }
+                    val speechListener = remember { KeywordSpeechListener(keyword = "吗") }
                     var showKeywordDialog by remember { mutableStateOf(false) }
 
                     LaunchedEffect(speechListener) {
@@ -105,7 +103,12 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-                    CameraScreen(cameraExecutor)
+                    CameraScreen(
+                        cameraExecutor = cameraExecutor,
+                        onRecognizedText = { text, isFinal ->
+                            speechListener.onRecognizedText(text, isFinal)
+                        }
+                    )
 
                     if (showKeywordDialog) {
                         KeywordDialog(

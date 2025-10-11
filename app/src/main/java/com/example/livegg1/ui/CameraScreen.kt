@@ -88,7 +88,8 @@ import com.example.livegg1.R
 @Composable
 fun CameraScreen(
     cameraExecutor: ExecutorService,
-    chapterTitle: String = "Chapter 1"
+    chapterTitle: String = "Chapter 1",
+    onRecognizedText: (text: String, isFinal: Boolean) -> Unit = { _, _ -> }
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -134,6 +135,7 @@ fun CameraScreen(
                         Log.d("Vosk", "onFinalResult: $text")
                         recognizedSentences.add(text) // 添加完整句子
                         currentPartialText = "" // 清空部分结果
+                        onRecognizedText(text, true)
                     }
                 } catch (e: Exception) {
                     Log.e("Vosk", "Error parsing final result: $it", e)
@@ -146,6 +148,9 @@ fun CameraScreen(
                 try {
                     val partialText = JSONObject(it).getString("partial")
                     currentPartialText = partialText // 更新部分结果
+                    if (partialText.isNotBlank()) {
+                        onRecognizedText(partialText, false)
+                    }
                 } catch (e: Exception) {
                     // 忽略解析错误
                 }

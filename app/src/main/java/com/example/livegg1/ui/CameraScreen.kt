@@ -36,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 // CompositionLocalProvider / LocalMinimumTouchTargetEnforcement removed to avoid dependency on material
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -74,6 +75,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import org.vosk.Model
 import org.vosk.Recognizer
@@ -102,6 +104,7 @@ fun CameraScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     val configuration = LocalConfiguration.current
     val screenAspectRatio = configuration.screenWidthDp.toFloat() / configuration.screenHeightDp.toFloat()
+    val coroutineScope = rememberCoroutineScope()
 
     // --- 状态管理 ---
     var imageToShow by remember { mutableStateOf<Bitmap?>(null) }
@@ -128,6 +131,12 @@ fun CameraScreen(
         while (isActive) {
             delay(decayIntervalMs)
             affectionLevel = (affectionLevel - decayStep).coerceIn(0f, 1f)
+        }
+    }
+// 好感度提高速度
+    fun bumpAffection() {
+        coroutineScope.launch {
+            affectionLevel = (affectionLevel + 0.009f).coerceIn(0f, 1f)
         }
     }
 
@@ -202,6 +211,7 @@ fun CameraScreen(
                         recognizedSentences.add(text) // 添加完整句子
                         currentPartialText = "" // 清空部分结果
                         onRecognizedText(text, true)
+                        bumpAffection()
                     }
                 } catch (e: Exception) {
                     Log.e("Vosk", "Error parsing final result: $it", e)
@@ -216,6 +226,7 @@ fun CameraScreen(
                     currentPartialText = partialText // 更新部分结果
                     if (partialText.isNotBlank()) {
                         onRecognizedText(partialText, false)
+                        bumpAffection()
                     }
                 } catch (e: Exception) {
                     // 忽略解析错误
@@ -670,7 +681,11 @@ private fun AffectionBar(
                 .padding(4.dp),
             contentAlignment = Alignment.BottomCenter
         ) {
-            val fillColor = if (clamped <= 0.2f) Color(0xFFA21011) else Color(0xFFFF6FA5)
+            val fillColor = when {
+                clamped >= 0.85f -> Color(0xFF7030A0)
+                clamped <= 0.2f -> Color(0xFFA21011)
+                else -> Color(0xFFFF6FA5)
+            }
             Box(
                 modifier = Modifier
                     .fillMaxWidth()

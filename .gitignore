@@ -7,6 +7,14 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Desktop project
+node_modules/
+desktop/app/node_modules/
+package-lock.json
+desktop/app/package-lock.json
+desktop/service/.venv/
+
 # IDE files
 .idea/
 

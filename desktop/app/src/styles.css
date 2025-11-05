@@ -1,0 +1,64 @@
+:root {
+  color-scheme: dark;
+  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  line-height: 1.5;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at top left, #1b2a38, #0d1016 60%);
+  color: #f4f4f4;
+}
+
+.app-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 24px 32px;
+  gap: 32px;
+  box-sizing: border-box;
+}
+
+.app-header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  letter-spacing: 0.1em;
+}
+
+.app-main {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  width: min(960px, 100%);
+}
+
+.card {
+  background: rgba(18, 25, 34, 0.85);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 24px 40px rgba(0, 0, 0, 0.35);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.card ul,
+.card ol {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+*** End Patch

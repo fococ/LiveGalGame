@@ -1,21 +1,28 @@
 *.iml
 .gradle
 /local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
 .DS_Store
 /build
 /captures
 .externalNativeBuild
 .cxx
 local.properties
+
 # Desktop project
 node_modules/
 desktop/app/node_modules/
 package-lock.json
 desktop/app/package-lock.json
 desktop/service/.venv/
+
+# IDE files
+.idea/
+
+# Keystore files
+*.keystore
+
+# Signing properties
+signing.properties
+/release.keystore
+/release
+.vscode

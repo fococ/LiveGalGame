@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -5,17 +8,33 @@ plugins {
 }
 
 android {
-    namespace = "com.example.livegg1"
+    namespace = "com.jstone.livegalgame"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.livegg1"
+        applicationId = "com.jstone.livegalgame"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.8.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    // 在这里添加 signingConfigs 整个代码块 
+    signingConfigs {
+        val keystorePropsFile = rootProject.file("signing.properties")
+        if (keystorePropsFile.exists()) {
+            create("release") {
+                val props = Properties().apply {
+                    FileInputStream(keystorePropsFile).use { load(it) }
+                }
+                storeFile = rootProject.file(props.getProperty("keystore.path") ?: "release.keystore")
+                storePassword = props.getProperty("keystore.password")
+                keyAlias = props.getProperty("key.alias")
+                keyPassword = props.getProperty("key.password")
+            }
+        }
     }
 
     buildTypes {
@@ -25,6 +44,15 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
+            // 检查 "release" 签名配置是否真的被创建了
+            // （只在 "发布" 工作流中才会创建）
+            if (signingConfigs.findByName("release") != null) {
+                // 如果存在，才去使用它
+                signingConfig = signingConfigs.getByName("release")
+            }
+            // 如果不存在（在 "检查" 工作流中），
+            // 这个 if 语句会跳过，构建将继续（生成一个未签名的 release 包）
         }
     }
     compileOptions {

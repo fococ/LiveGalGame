@@ -13,6 +13,13 @@ class Settings(BaseModel):
     memory_backend: Literal["in-memory", "mem0", "graphti"] = Field(
         default="in-memory", alias="MEMORY_BACKEND"
     )
+    whisper_model_id: str = Field(
+        default="Systran/faster-whisper-large-v3", alias="WHISPER_MODEL_ID"
+    )
+    whisper_device: str = Field(default="auto", alias="WHISPER_DEVICE")
+    whisper_compute_type: str = Field(
+        default="float16", alias="WHISPER_COMPUTE_TYPE"
+    )
 
     class Config:
         populate_by_name = True

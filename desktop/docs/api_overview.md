@@ -10,20 +10,43 @@
 - 响应：`{"status": "ok"}`
 - 作用：Electron 启动时检测 Python 服务是否可用。
 
-## 2. 语音转写 (预留)
+## 2. 语音转写（faster-whisper）
 - `POST /transcribe`
-- Content-Type：`audio/webm` 或 `multipart/form-data`
-- 请求体：音频片段 + 元信息（采样率、说话人、语言等）。
+- Content-Type：`multipart/form-data`
+- 字段：
+  - `file`：必填，音频文件（推荐 16-bit PCM WAV / WebM；需要系统安装 `ffmpeg` 以支持更多格式）
+  - `language`：可选，ISO 639-1/2 语言代码（如 `zh`、`en`），不传时由模型自动检测
 - 响应示例：
 ```json
 {
   "segments": [
-    {"id": 0, "start": 0.0, "end": 3.2, "text": "你好，很高兴见到你", "confidence": 0.87}
+    {
+      "id": 0,
+      "start": 0.0,
+      "end": 1.92,
+      "text": "你好，很高兴见到你",
+      "confidence": 0.52
+    },
+    {
+      "id": 1,
+      "start": 2.18,
+      "end": 4.86,
+      "text": "今晚要不要出去吃饭？",
+      "confidence": 0.49
+    }
   ],
-  "final": false
+  "language": "zh",
+  "duration": 5.12,
+  "final": true
 }
 ```
-- 说明：Milestone 1 将完善实现细节，目前占位。
+- 服务实现基于 `faster-whisper`，默认模型为 `Systran/faster-whisper-large-v3`，首次调用会自动下载缓存到本地。
+- 典型请求（macOS 示例）：
+```bash
+curl -X POST http://localhost:8080/api/v1/transcribe \
+  -F "file=@sample.wav" \
+  -F "language=zh"
+```
 
 ## 3. AI 建议生成 (预留)
 - `POST /guidance`
@@ -65,6 +88,6 @@
 ```
 
 ## 待办
-- 明确音频格式及切片长度策略。
+- 明确前端音频分片策略与错误回退机制。
 - 定义记忆写入接口 `/memories`。
 - 增加长连接方案（WebSocket/SSE）以降低延迟。
